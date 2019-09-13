@@ -86,25 +86,34 @@ namespace VersionChanger
         /// </summary>
         /// <param name="version">The version number</param>
         /// <returns>The version</returns>
-        private static Version ExtractVersion(string version)
+        public static Version ExtractVersion(string version)
         {
             if (string.IsNullOrEmpty(version))
                 return null;
 
-            var content = version.Split(new[] {"."}, StringSplitOptions.RemoveEmptyEntries);
-
-            switch (content.Length)
+            try
             {
-                case 4:
-                    return new Version(content[0].ToInt(), content[1].ToInt(), content[2].ToInt(), content[3].ToInt());
-                case 3:
-                    return new Version(content[0].ToInt(), content[1].ToInt(), content[2].ToInt());
-                case 2:
-                    return new Version(content[0].ToInt(), content[1].ToInt());
-                case 1:
-                    return new Version(content[0].ToInt(), 0);
-                default:
-                    return null;
+                return Version.Parse(version);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Console.Error.WriteLine($"Negative value in {version}");
+                return new Version();
+            }
+            catch (ArgumentException)
+            {
+                Console.Error.WriteLine($"Bad number of components in {version}");
+                return new Version();
+            }
+            catch (FormatException)
+            {
+                Console.Error.WriteLine($"Non-integer value in {version}");
+                return new Version();
+            }
+            catch (OverflowException)
+            {
+                Console.Error.WriteLine($"Number out of range in {version}");
+                return new Version();
             }
         }
 

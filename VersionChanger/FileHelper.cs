@@ -91,30 +91,7 @@ namespace VersionChanger
 
             var version = VersionNumberRegex.Match(content).Value;
 
-            try
-            {
-                return Version.Parse(version);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                Console.Error.WriteLine($"Negative value in {version}");
-                return new Version();
-            }
-            catch (ArgumentException)
-            {
-                Console.Error.WriteLine($"Bad number of components in {version}");
-                return new Version();
-            }
-            catch (FormatException)
-            {
-                Console.Error.WriteLine($"Non-integer value in {version}");
-                return new Version();
-            }
-            catch (OverflowException)
-            {
-                Console.Error.WriteLine($"Number out of range in {version}");
-                return new Version();
-            }
+            return Global.ExtractVersion(version); 
         }
     }
 }
