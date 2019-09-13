@@ -1,6 +1,16 @@
 # VersionChanger
 Small console application to change the version of a C# application
 
+**Content**
+<!-- TOC -->
+
+- [VersionChanger](#versionchanger)
+    - [What is the purpose?](#what-is-the-purpose)
+    - [Installation](#installation)
+        - [Conditions](#conditions)
+
+<!-- /TOC -->
+
 ## What is the purpose?
 If you want to update the assembly version of a C# program you can do it manually by setting the values in the `AssemblyInfo.cs`. But when you have to do it manually the danger is great that you forget it. It's happened to me a lot. I've build my application and shipped it to the customers and then I noticed that I forgot to update the version number. So I had to go back to Visual Studio, update the version number and so on. Because of that I've created this small console application which will update the version number automatically. If installed the *VersionChanger* as a pre-build event to my project to I don't have to worry about the version number anymore.
 
