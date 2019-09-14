@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Authors>Andreas Pouwels</Authors>
+    <PackageProjectUrl>https://github.com/InvaderZim85/VersionChanger</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/InvaderZim85/VersionChanger</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>
