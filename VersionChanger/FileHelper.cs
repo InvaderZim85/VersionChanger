@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -13,7 +14,7 @@ namespace VersionChanger
         /// <summary>
         /// Contains the regex for the version number
         /// </summary>
-        private static readonly Regex VersionNumberRegex = new Regex(@"\d+\.{1}\d+\.{1}\d+\.{1}\d+");
+        private static readonly Regex VersionNumberRegex = new Regex(@"\d+\.{1}\d+\.*\d*\.*\d*");
 
         /// <summary>
         /// Gets the path of a specified file starting from the given directory
@@ -59,13 +60,26 @@ namespace VersionChanger
             if (string.IsNullOrEmpty(version))
                 throw new ArgumentNullException(nameof(version));
 
-            var content = File.ReadAllText(file);
-            if (string.IsNullOrEmpty(content))
+            var result = new List<string>();
+
+            var content = File.ReadAllLines(file);
+
+            if (!content.Any())
                 return false;
 
-            content = VersionNumberRegex.Replace(content, version);
+            foreach (var line in content)
+            {
+                if (line.StartsWith("//") || !VersionNumberRegex.IsMatch(line))
+                {
+                    result.Add(line);
+                }
+                else if (VersionNumberRegex.IsMatch(line))
+                {
+                    result.Add(VersionNumberRegex.Replace(line, version));
+                }
+            }
 
-            File.WriteAllText(file, content);
+            File.WriteAllLines(file, result);
 
             return File.Exists(file);
         }
@@ -85,13 +99,15 @@ namespace VersionChanger
             if (!File.Exists(file))
                 throw new FileNotFoundException("The given file doesn't exist.", file);
 
-            var content = File.ReadAllText(file);
-            if (string.IsNullOrEmpty(content))
-                return new Version();
+            var content = File.ReadAllLines(file);
+            if (!content.Any())
+                return null;
 
-            var version = VersionNumberRegex.Match(content).Value;
-
-            return Global.ExtractVersion(version); 
+            return (from line in content.Where(w => !w.StartsWith("//"))
+                where VersionNumberRegex.IsMatch(line)
+                select VersionNumberRegex.Match(line).Value
+                into version
+                select Global.ExtractVersion(version)).FirstOrDefault();
         }
     }
 }

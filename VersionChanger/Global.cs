@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using VersionChanger.DataObjects;
 
 namespace VersionChanger
 {
@@ -39,9 +40,30 @@ namespace VersionChanger
         /// </summary>
         /// <param name="value">The string value</param>
         /// <returns>The converted int value</returns>
-        public static int ToInt(this string value)
+        private static int ToInt(this string value)
         {
             return int.TryParse(value, out var result) ? result : 0;
+        }
+
+        /// <summary>
+        /// Extracts the shipped parameters
+        /// </summary>
+        /// <param name="args">The parameters</param>
+        /// <returns>The parameters</returns>
+        public static Parameter ExtractParameter(string[] args)
+        {
+            if (!args.Any())
+                return null;
+
+            var parameter = new Parameter();
+            if (args.Any(a => a.ContainsIgnoreCase("-f=")))
+            {
+                parameter.AssemblyInfoFile = args.FirstOrDefault(f => f.ContainsIgnoreCase("-f="))?.Replace("-f=", "");
+            }
+
+            parameter.Version = ExtractVersion(args);
+
+            return parameter;
         }
 
         /// <summary>
@@ -49,7 +71,7 @@ namespace VersionChanger
         /// </summary>
         /// <param name="args">The shipped arguments</param>
         /// <returns>The version</returns>
-        public static Version ExtractVersion(string[] args)
+        private static Version ExtractVersion(string[] args)
         {
             // Check if something was transferred
             if (!args.Any())
@@ -74,11 +96,13 @@ namespace VersionChanger
                     revision = argument.Replace("-r=", "").ToInt();
 
                 // A complete version number is given
-                if (argument.Contains("."))
+                if (!argument.ContainsIgnoreCase("-f=") && argument.Contains("."))
                     return ExtractVersion(argument);
             }
 
-            return new Version(major, minor, build, revision);
+            return major == 0 && minor == 0 && build == 0 && revision == 0
+                ? null
+                : new Version(major, minor, build, revision);
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace VersionChanger
 {
@@ -11,7 +12,8 @@ namespace VersionChanger
         private static void Main(string[] args)
         {
             var generatedVersion = false;
-            var givenVersion = Global.ExtractVersion(args);
+            var parameters = Global.ExtractParameter(args);
+            var givenVersion = parameters?.Version;
 
             if (givenVersion == null)
             {
@@ -22,12 +24,25 @@ namespace VersionChanger
 
             try
             {
-                // Get the path of the assembly file
-                var assemblyFile = FileHelper.GetFile("AssemblyInfo", pattern: "*.cs");
-                if (string.IsNullOrEmpty(assemblyFile))
+                var assemblyFile = "";
+                if (string.IsNullOrEmpty(parameters?.AssemblyInfoFile))
                 {
-                    Console.Error.WriteLine("Path of the assembly info file could not be determined.");
-                    return;
+                    // Get the path of the assembly file
+                    assemblyFile = FileHelper.GetFile("AssemblyInfo", pattern: "*.cs");
+                    if (string.IsNullOrEmpty(assemblyFile))
+                    {
+                        Console.Error.WriteLine("Path of the assembly info file could not be determined.");
+                        return;
+                    }
+                }
+                else
+                {
+                    assemblyFile = parameters.AssemblyInfoFile;
+                    if (!File.Exists(assemblyFile))
+                    {
+                        Console.Error.WriteLine("Path of the assembly info file could not be determined.");
+                        return;
+                    }
                 }
 
                 // Get the current version
@@ -36,7 +51,7 @@ namespace VersionChanger
                 Version version;
                 if (generatedVersion)
                 {
-                    var releaseNumber = currentVersion.Build;
+                    var releaseNumber = currentVersion.Build < 0 ? 0 : currentVersion.Build;
                     if (givenVersion.Major == currentVersion.Major && givenVersion.Minor == currentVersion.Minor)
                         releaseNumber++;
 

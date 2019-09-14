@@ -6,6 +6,7 @@ Small console application to change the version of a C# application
 
 - [VersionChanger](#versionchanger)
     - [What is the purpose?](#what-is-the-purpose)
+    - [Parameters](#parameters)
     - [Installation](#installation)
         - [Conditions](#conditions)
 
@@ -13,6 +14,39 @@ Small console application to change the version of a C# application
 
 ## What is the purpose?
 If you want to update the assembly version of a C# program you can do it manually by setting the values in the `AssemblyInfo.cs`. But when you have to do it manually the danger is great that you forget it. It's happened to me a lot. I've build my application and shipped it to the customers and then I noticed that I forgot to update the version number. So I had to go back to Visual Studio, update the version number and so on. Because of that I've created this small console application which will update the version number automatically. If installed the *VersionChanger* as a pre-build event to my project to I don't have to worry about the version number anymore.
+
+## Parameters
+The tool can start with command line parameters. The following parameters are supported:
+
+| Nr. | Switch    | Description     | Example |
+|----:|-----------|-----------------|---------|
+| 1.  | ma        | Major number    | `-ma=1` |
+| 2.  | mi        | Minor number    | `-mi=2` |
+| 3.  | b         | Build number    | `-b=4`  |
+| 4.  | r         | Revision number | `-r=12` |
+| 5.  | f         | Assembly file path | `-f="C:\Repos\Application\Properties\AssemblyInfo.cs` |
+| 6.  | /         | You can ship a complete version number without any switch. | `1.2.4.12` |
+
+**Example**
+1. Assembly file and complete version
+
+    ```
+    VersionChanger.exe -f="C:\Repos\Application\Properties\AssemblyInfo.cs" 1.2.4.12
+    ```
+
+2. Assembly file and major and minor number
+
+    ```
+    VersionChanger.exe -f="C:\Repos\Application\Properties\AssemblyInfo.cs" -ma=1 -mi=2
+    ```
+
+3. Major, minor, build and revision number
+
+    ```
+    VersionChanger.exe -ma=1 -mi=2 -b=4 -r=12
+    ```
+
+> **Note**: If you provide the version number without any switch like this `1.2.4.12` it will be parsed automatically by the [`Version.Parse`-Method](https://docs.microsoft.com/en-us/dotnet/api/system.version.parse?view=netframework-4.8). See the examples of the `Parse`-Method for more information.
 
 ## Installation
 If you want to install the *VersionChanger* as a pre-build event you have to do the following:
