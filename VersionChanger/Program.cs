@@ -18,7 +18,7 @@ namespace VersionChanger
 
             var givenVersion = parameters?.Version;
             var versionFormat = parameters?.Format ?? Global.VersionNumberFormat.Long;
-            var versionType = parameters?.VersionType ?? Global.VersionType.WithDaysAndMinutes;
+            var versionType = parameters?.VersionType ?? Global.VersionType.WithDaysOfTheYear;
 
             if (givenVersion == null)
             {

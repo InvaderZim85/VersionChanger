@@ -22,7 +22,7 @@ namespace VersionChanger.DataObjects
         /// <summary>
         /// Gets or sets the version type
         /// </summary>
-        public Global.VersionType VersionType { get; set; } = Global.VersionType.WithDaysAndMinutes;
+        public Global.VersionType VersionType { get; set; } = Global.VersionType.WithDaysOfTheYear;
 
         /// <summary>
         /// Prints the parameters to the console

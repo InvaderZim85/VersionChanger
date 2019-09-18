@@ -41,7 +41,7 @@ namespace VersionChanger
             /// <summary>
             /// Creates a version with the following format: Year.DaysOfYear.ReleaseNumber.MinutesOfTheDay (e.G. 19.216.0.280)
             /// </summary>
-            WithDaysAndMinutes = 1,
+            WithDaysOfTheYear = 1,
             /// <summary>
             /// Creates a version with the following format: Year.CalendarWeek.ReleaseNumber.MinutesOfTheDay (e.G. 19.38.0.280)
             /// </summary>
