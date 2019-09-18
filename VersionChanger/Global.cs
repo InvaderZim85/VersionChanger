@@ -37,11 +37,11 @@ namespace VersionChanger
         public enum VersionType
         {
             /// <summary>
-            /// Creates a version where the second place is the calendar week
+            /// Creates a version with the following format: Year.CalendarWeek.ReleaseNumber.MinutesOfTheDay (e.G. 19.38.0.280)
             /// </summary>
             WithCalendarWeek,
             /// <summary>
-            /// Creates a version where the second place are the days of the year and the third place are the minutes of the day
+            /// Creates a version with the following format: Year.DaysOfYear.ReleaseNumber.MinutesOfTheDay (e.G. 19.216.0.280)
             /// </summary>
             WithDaysAndMinutes
         }

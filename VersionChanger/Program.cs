@@ -91,22 +91,12 @@ namespace VersionChanger
             var majorNumber = currentVersion.Major < 0 ? 0 : currentVersion.Major;
             var minorNumber = currentVersion.Minor < 0 ? 0 : currentVersion.Minor;
             var buildNumber = currentVersion.Build < 0 ? 0 : currentVersion.Build;
-            var revisionNumber = currentVersion.Revision < 0 ? 0 : currentVersion.Revision;
 
-            if (type == Global.VersionType.WithCalendarWeek)
-            {
-                if (givenVersion.Major == majorNumber && givenVersion.Minor == minorNumber)
-                    buildNumber++;
+            // Check if the major (year) and the minor (calendar week) are equal
+            if (givenVersion.Major == majorNumber && givenVersion.Minor == minorNumber)
+                buildNumber++; // The number is equals, so update the build number
 
-                return new Version(givenVersion.Major, givenVersion.Minor, buildNumber, givenVersion.Revision);
-            }
-            else
-            {
-                if (majorNumber == givenVersion.Major && minorNumber == givenVersion.Minor && buildNumber == givenVersion.Build)
-                    revisionNumber++;
-
-                return new Version(givenVersion.Major, givenVersion.Minor, givenVersion.Build, revisionNumber);
-            }
+            return new Version(givenVersion.Major, givenVersion.Minor, buildNumber, givenVersion.Revision);
         }
     }
 }
