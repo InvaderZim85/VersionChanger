@@ -18,11 +18,12 @@ namespace VersionChanger
 
             var givenVersion = parameters?.Version;
             var versionFormat = parameters?.Format ?? Global.VersionNumberFormat.Long;
+            var versionType = parameters?.VersionType ?? Global.VersionType.WithDaysAndMinutes;
 
             if (givenVersion == null)
             {
                 Console.WriteLine("No version number was specified. Number is generated");
-                givenVersion = Global.CreateVersion(versionFormat);
+                givenVersion = Global.CreateVersion(versionFormat, versionType);
                 generatedVersion = true;
             }
 
@@ -81,6 +82,30 @@ namespace VersionChanger
             catch (Exception ex)
             {
                 Console.Error.Write($"An error has occured: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Compares the given and the current version and creates a new of the difference
+        /// </summary>
+        /// <param name="type">The type of the version</param>
+        /// <param name="currentVersion">The current version</param>
+        /// <param name="givenVersion">The given version</param>
+        /// <returns>The new created version</returns>
+        private static Version CompareVersions(Global.VersionType type, Version currentVersion, Version givenVersion)
+        {
+            var majorNumber = currentVersion.Major < 0 ? 0 : currentVersion.Major;
+            var minorNumber = currentVersion.Minor < 0 ? 0 : currentVersion.Minor;
+            var buildNumber = currentVersion.Build < 0 ? 0 : currentVersion.Build;
+            var revisionNumber = currentVersion.Revision < 0 ? currentVersion.Revision;
+
+            if (type == Global.VersionType.WithCalendarWeek)
+            {
+
+            }
+            else
+            {
+                
             }
         }
     }
