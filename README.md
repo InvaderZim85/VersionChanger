@@ -18,10 +18,10 @@ Small console application to change the version of a C# application
 <!-- /TOC -->
 
 ## What is the purpose?
-If you want to update the assembly version of a C# program you can do it manually by setting the values in the `AssemblyInfo.cs`. But when you have to do it manually the danger is great that you forget it. It's happened to me a lot. I've build my application and shipped it to the customers and then I noticed that I forgot to update the version number. So I had to go back to Visual Studio, update the version number and so on. Because of that I've created this small console application which will update the version number automatically. If installed the *VersionChanger* as a pre-build event to my project to I don't have to worry about the version number anymore.
+If you want to update the assembly version of a C# program you can do it manually by setting the values in the `AssemblyInfo.cs`. But when you have to do it manually the danger is great that you forget it. It's happened to me a lot. I've build my application and shipped it to the customers and then I noticed that I forgot to update the version number. So I had to go back to Visual Studio, update the version number and so on. Because of that I've created this small console application which will update the version number automatically. I've installed the *VersionChanger* as a pre-build event to my project and now I don't have to worry about the version number anymore.
 
 ## Configuration
-The program offers you the possibility to specify the format of the version number, the path of your *AssemblyFile* or the version number to use. 
+The program offers you the possibility to specify some settings to customize the version number a little bit.
 
 The following settings can currently be made
 - The type of the version number (default: Days of the year, see [Version type](#version-type))
@@ -38,16 +38,16 @@ The tool can start with command line parameters. The following parameters are su
 
 | Nr. | Switch    | Description     | Example |
 |----:|-----------|-----------------|---------|
-| 1.  | Major     | Major number    | `-major 1` |
-| 2.  | Minor     | Minor number    | `-minor 2` |
-| 3.  | Build     | Build number    | `-build 4`  |
-| 4.  | Revision  | Revision number | `-revision 12` |
-| 5.  | File      | Assembly file path | `-file  "C:\Repos\Application\Properties\AssemblyInfo.cs` |
-| 6.  | Version   | Version number | `- version 1.2.4.12` |
-| 7.  | Format    | Version format. For more information see: [Version format](#version-format)| `-format 2` |
-| 8. | Type | Version type. For more information see: [Version type](#version-type) | `-type 1` |
+| 1.  | *-major*     | Major number    | `-major 1` |
+| 2.  | *-minor*     | Minor number    | `-minor 2` |
+| 3.  | *-build*     | Build number    | `-build 4`  |
+| 4.  | *-revision*  | Revision number | `-revision 12` |
+| 5.  | *-file*      | Assembly file path | `-file  "C:\Repos\Application\Properties\AssemblyInfo.cs` |
+| 6.  | *-version*   | Version number | `-version 1.2.4.12` |
+| 7.  | *-format*    | Version format. For more information see: [Version format](#version-format)| `-format 2` |
+| 8. | *-type* | Version type. For more information see: [Version type](#version-type) | `-type 1` |
 
-> **Note** All parameters are optional
+> **Note** All parameters are optional and case intensitive.
 
 **Example**
 1. Assembly file and complete version
