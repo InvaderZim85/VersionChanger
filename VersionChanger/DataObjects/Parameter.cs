@@ -18,5 +18,22 @@ namespace VersionChanger.DataObjects
         /// Gets or sets the format (<see cref="Global.VersionNumberFormat.Long"/> is the default value)
         /// </summary>
         public Global.VersionNumberFormat Format { get; set; } = Global.VersionNumberFormat.Long;
+
+        /// <summary>
+        /// Gets or sets the version type
+        /// </summary>
+        public Global.VersionType VersionType { get; set; } = Global.VersionType.WithDaysOfTheYear;
+
+        /// <summary>
+        /// Prints the parameters to the console
+        /// </summary>
+        public void Print()
+        {
+            Console.WriteLine("INFO > Parameters:" +
+                              $"\r\n\t- Version......: {Version}" +
+                              $"\r\n\t- Assembly file: {AssemblyInfoFile}" +
+                              $"\r\n\t- Format.......: {Format}" +
+                              $"\r\n\t- Version type.: {VersionType}");
+        }
     }
 }
