@@ -56,13 +56,7 @@ namespace VersionChanger
                 Version version;
                 if (generatedVersion)
                 {
-                    var releaseNumber = currentVersion.Build < 0 ? 0 : currentVersion.Build;
-                    var revisionNumber = givenVersion.Revision < 0 ? 0 : givenVersion.Revision;
-
-                    if (givenVersion.Major == currentVersion.Major && givenVersion.Minor == currentVersion.Minor)
-                        releaseNumber++;
-
-                    version = new Version(givenVersion.Major, givenVersion.Minor, releaseNumber, revisionNumber);
+                    version = CompareVersions(versionType, currentVersion, givenVersion);
                 }
                 else
                 {
@@ -97,15 +91,21 @@ namespace VersionChanger
             var majorNumber = currentVersion.Major < 0 ? 0 : currentVersion.Major;
             var minorNumber = currentVersion.Minor < 0 ? 0 : currentVersion.Minor;
             var buildNumber = currentVersion.Build < 0 ? 0 : currentVersion.Build;
-            var revisionNumber = currentVersion.Revision < 0 ? currentVersion.Revision;
+            var revisionNumber = currentVersion.Revision < 0 ? 0 : currentVersion.Revision;
 
             if (type == Global.VersionType.WithCalendarWeek)
             {
+                if (givenVersion.Major == majorNumber && givenVersion.Minor == minorNumber)
+                    buildNumber++;
 
+                return new Version(givenVersion.Major, givenVersion.Minor, buildNumber, givenVersion.Revision);
             }
             else
             {
-                
+                if (majorNumber == givenVersion.Major && minorNumber == givenVersion.Minor && buildNumber == givenVersion.Build)
+                    revisionNumber++;
+
+                return new Version(givenVersion.Major, givenVersion.Minor, givenVersion.Build, revisionNumber);
             }
         }
     }
