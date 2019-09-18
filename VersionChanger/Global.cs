@@ -57,37 +57,30 @@ namespace VersionChanger
             /// The major version number
             /// </summary>
             Major,
-
             /// <summary>
             /// The minor version number
             /// </summary>
             Minor,
-
             /// <summary>
             /// The build number
             /// </summary>
             Build,
-
             /// <summary>
             /// The revision number
             /// </summary>
             Revision,
-
             /// <summary>
             /// The path of the assembly file
             /// </summary>
             File,
-
             /// <summary>
             /// The desired version format
             /// </summary>
             Format,
-
             /// <summary>
             /// The desired version type
             /// </summary>
             Type,
-
             /// <summary>
             /// The complete version
             /// </summary>
@@ -128,8 +121,6 @@ namespace VersionChanger
             return int.TryParse(value, out var result) ? result : fallback;
         }
 
-
-
         /// <summary>
         /// Gets the command line parameters or the config file parameters
         /// </summary>
@@ -156,14 +147,11 @@ namespace VersionChanger
             {
                 var content = File.ReadAllText(path);
 
-                if (string.IsNullOrEmpty(content))
-                    return null;
-
-                return JsonConvert.DeserializeObject<Parameter>(content);
+                return string.IsNullOrEmpty(content) ? null : JsonConvert.DeserializeObject<Parameter>(content);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error has occured while loading the config file: {ex.Message}");
+                Console.Error.WriteLine($"ERROR > An error has occured while loading the config file: {ex.Message}");
                 return null;
             }
         }
@@ -217,7 +205,7 @@ namespace VersionChanger
                 var build = GetEntry<int>(ArgumentKeys.Build, parameterList);
                 var revision = GetEntry<int>(ArgumentKeys.Revision, parameterList);
 
-                // Only when there is an number
+                // Only when there is a "valid" number
                 if (major > 0 || minor > 0 || build > 0 || revision > 0)
                     version = new Version(major, minor, build, revision);
             }
@@ -256,7 +244,7 @@ namespace VersionChanger
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
+                Console.Error.WriteLine(
                     $"ERROR > An error has occured while extracting the command line parameters. Message: {ex.Message}");
                 return default;
             }
