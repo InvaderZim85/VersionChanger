@@ -44,8 +44,8 @@ The tool can start with command line parameters. The following parameters are su
 | 4.  | *-revision*  | Revision number | `-revision 12` |
 | 5.  | *-file*      | Assembly file path | `-file  "C:\Repos\Application\Properties\AssemblyInfo.cs` |
 | 6.  | *-version*   | Version number | `-version 1.2.4.12` |
-| 7.  | *-format*    | Version format. For more information see: [Version format](#version-format)| `-format 2` |
-| 8. | *-type* | Version type. For more information see: [Version type](#version-type) | `-type 1` |
+| 7.  | *-format*    | Version format (see: [Version format](#version-format)) | `-format 2` |
+| 8. | *-type* | Version type (see: [Version type](#version-type)) | `-type 1` |
 
 > **Note** All parameters are optional and case intensitive.
 
