@@ -32,6 +32,7 @@ namespace VersionChanger
                 string assemblyFile;
                 if (string.IsNullOrEmpty(parameters?.AssemblyInfoFile))
                 {
+                    Console.WriteLine("INFO > No assembly file specified. Determine path of the local assembly file.");
                     // Get the path of the assembly file
                     assemblyFile = FileHelper.GetFile("AssemblyInfo", pattern: "*.cs");
                     if (string.IsNullOrEmpty(assemblyFile))
@@ -49,6 +50,8 @@ namespace VersionChanger
                         return;
                     }
                 }
+
+                Console.WriteLine($"INFO > Assembly file: {assemblyFile}");
 
                 // Get the current version
                 var currentVersion = FileHelper.GetCurrentVersion(assemblyFile);
