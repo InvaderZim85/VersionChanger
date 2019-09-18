@@ -12,9 +12,9 @@ namespace VersionChanger
         private static void Main(string[] args)
         {
             var generatedVersion = false;
-            var parameters = Global.ExtractParameter(args);
+            var parameters = Global.LoadParameter(args);
 
-            Global.PrintParameters(parameters);
+            parameters?.Print();
 
             var givenVersion = parameters?.Version;
             var versionFormat = parameters?.Format ?? Global.VersionNumberFormat.Long;
@@ -22,7 +22,7 @@ namespace VersionChanger
 
             if (givenVersion == null)
             {
-                Console.WriteLine("No version number was specified. Number is generated");
+                Console.WriteLine("INFO > No version number was specified. Number is generated");
                 givenVersion = Global.CreateVersion(versionFormat, versionType);
                 generatedVersion = true;
             }
@@ -36,7 +36,7 @@ namespace VersionChanger
                     assemblyFile = FileHelper.GetFile("AssemblyInfo", pattern: "*.cs");
                     if (string.IsNullOrEmpty(assemblyFile))
                     {
-                        Console.Error.WriteLine("Path of the assembly info file could not be determined.");
+                        Console.Error.WriteLine("ERROR > Path of the assembly info file could not be determined.");
                         return;
                     }
                 }
@@ -45,7 +45,7 @@ namespace VersionChanger
                     assemblyFile = parameters.AssemblyInfoFile;
                     if (!File.Exists(assemblyFile))
                     {
-                        Console.Error.WriteLine("Path of the assembly info file could not be determined.");
+                        Console.Error.WriteLine("ERROR > Path of the assembly info file could not be determined.");
                         return;
                     }
                 }
@@ -56,7 +56,7 @@ namespace VersionChanger
                 Version version;
                 if (generatedVersion)
                 {
-                    version = CompareVersions(versionType, currentVersion, givenVersion);
+                    version = CompareVersions(currentVersion, givenVersion);
                 }
                 else
                 {
@@ -64,29 +64,28 @@ namespace VersionChanger
                 }
 
                 var versionString = Global.GetVersionString(version, versionFormat);
-                Console.WriteLine("Version numbers:" +
+                Console.WriteLine("INFO > Version numbers:" +
                                   $"\r\n\t- Current version: {currentVersion}" +
                                   $"\r\n\t- New version....: {versionString}");
 
                 if (FileHelper.ChangeFileContent(assemblyFile, versionString))
-                    Console.WriteLine("Version updated.");
+                    Console.WriteLine("INFO > Version updated.");
                 else
-                    Console.Error.WriteLine("An error has occured while updating the version number.");
+                    Console.Error.WriteLine("ERROR > An error has occured while updating the version number.");
             }
             catch (Exception ex)
             {
-                Console.Error.Write($"An error has occured: {ex.Message}");
+                Console.Error.Write($"ERROR > An error has occured: {ex.Message}");
             }
         }
 
         /// <summary>
         /// Compares the given and the current version and creates a new of the difference
         /// </summary>
-        /// <param name="type">The type of the version</param>
         /// <param name="currentVersion">The current version</param>
         /// <param name="givenVersion">The given version</param>
         /// <returns>The new created version</returns>
-        private static Version CompareVersions(Global.VersionType type, Version currentVersion, Version givenVersion)
+        private static Version CompareVersions(Version currentVersion, Version givenVersion)
         {
             var majorNumber = currentVersion.Major < 0 ? 0 : currentVersion.Major;
             var minorNumber = currentVersion.Minor < 0 ? 0 : currentVersion.Minor;
@@ -95,8 +94,10 @@ namespace VersionChanger
             // Check if the major (year) and the minor (calendar week) are equal
             if (givenVersion.Major == majorNumber && givenVersion.Minor == minorNumber)
                 buildNumber++; // The number is equals, so update the build number
+            else
+                buildNumber = 0;
 
-            return new Version(givenVersion.Major, givenVersion.Minor, buildNumber, givenVersion.Revision);
+            return new Version(givenVersion.Major, givenVersion.Minor, buildNumber, givenVersion.Revision < 0 ? 0 : givenVersion.Revision);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Newtonsoft.Json;
 using VersionChanger.DataObjects;
 
 namespace VersionChanger
@@ -80,12 +81,25 @@ namespace VersionChanger
             return int.TryParse(value, out var result) ? result : fallback;
         }
 
+
+
+        /// <summary>
+        /// Gets the command line parameters or the config file parameters
+        /// </summary>
+        /// <param name="args">The command line arguments</param>
+        /// <returns>The loaded parameters, if nothing is available null will be returned</returns>
+        public static Parameter LoadParameter(string[] args)
+        {
+            // Check if the user added some parameters
+            return args.Any() ? ExtractParameter(args) : LoadParameter();
+        }
+
         /// <summary>
         /// Extracts the shipped parameters
         /// </summary>
         /// <param name="args">The parameters</param>
         /// <returns>The parameters</returns>
-        public static Parameter ExtractParameter(string[] args)
+        private static Parameter ExtractParameter(string[] args)
         {
             if (!args.Any())
                 return null;
@@ -114,6 +128,33 @@ namespace VersionChanger
             parameter.Version = ExtractVersion(args);
 
             return parameter;
+        }
+
+        /// <summary>
+        /// Loads the parameters of the config file if it's exists
+        /// </summary>
+        /// <returns>The parameters. If no parameters available, null will be returned</returns>
+        private static Parameter LoadParameter()
+        {
+            var path = Path.Combine(GetBaseFolder(), "VersionChangerConfig.json");
+
+            if (!File.Exists(path))
+                return null;
+
+            try
+            {
+                var content = File.ReadAllText(path);
+
+                if (string.IsNullOrEmpty(content))
+                    return null;
+
+                return JsonConvert.DeserializeObject<Parameter>(content);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error has occured while loading the config file: {ex.Message}");
+                return null;
+            }
         }
 
         /// <summary>
@@ -219,18 +260,6 @@ namespace VersionChanger
                         ? new Version(year, week, 0, (int) DateTime.Now.TimeOfDay.TotalMinutes)
                         : new Version(year, daysOfYear, minuteOfDay, 0);
             }
-        }
-
-        /// <summary>
-        /// Prints the parameters
-        /// </summary>
-        /// <param name="parameters">The parameters</param>
-        public static void PrintParameters(Parameter parameters)
-        {
-            Console.WriteLine("Parameters:" +
-                              $"\r\n\t- Version: {parameters?.Version?.ToString() ?? "/"}" +
-                              $"\r\n\t- File...: {parameters?.AssemblyInfoFile ?? "/"}" +
-                              $"\r\n\t- Format.: {parameters?.Format ?? VersionNumberFormat.Long}");
         }
 
         /// <summary>

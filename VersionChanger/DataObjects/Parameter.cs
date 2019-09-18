@@ -23,5 +23,17 @@ namespace VersionChanger.DataObjects
         /// Gets or sets the version type
         /// </summary>
         public Global.VersionType VersionType { get; set; } = Global.VersionType.WithDaysAndMinutes;
+
+        /// <summary>
+        /// Prints the parameters to the console
+        /// </summary>
+        public void Print()
+        {
+            Console.WriteLine("INFO > Parameters:" +
+                              $"\r\n\t- Version......: {Version}" +
+                              $"\r\n\t- Assembly file: {AssemblyInfoFile}" +
+                              $"\r\n\t- Format.......: {Format}" +
+                              $"\r\n\t- Version type.: {VersionType}");
+        }
     }
 }
