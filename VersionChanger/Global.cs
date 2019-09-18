@@ -308,10 +308,10 @@ namespace VersionChanger
                 case VersionNumberFormat.Middle:
                     return type == VersionType.WithCalendarWeek
                         ? new Version(year, week, 0)
-                        : new Version(year, daysOfYear, minuteOfDay);
+                        : new Version(year, daysOfYear, 0);
                 default:
                     return type == VersionType.WithCalendarWeek
-                        ? new Version(year, week, 0, (int) DateTime.Now.TimeOfDay.TotalMinutes)
+                        ? new Version(year, week, 0, minuteOfDay)
                         : new Version(year, daysOfYear, 0, minuteOfDay);
             }
         }
