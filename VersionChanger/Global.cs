@@ -13,6 +13,25 @@ namespace VersionChanger
     internal static class Global
     {
         /// <summary>
+        /// The different formats of the version number
+        /// </summary>
+        public enum VersionNumberFormat
+        {
+            /// <summary>
+            /// Short format with two places like 1.2
+            /// </summary>
+            Short,
+            /// <summary>
+            /// Middle format with three places like 1.2.3
+            /// </summary>
+            Middle,
+            /// <summary>
+            /// Long format with four places like 1.2.3.4 (default)
+            /// </summary>
+            Long
+        }
+
+        /// <summary>
         /// Gets the path of the base folder
         /// </summary>
         /// <returns>The path of the base folder</returns>
@@ -39,10 +58,11 @@ namespace VersionChanger
         /// Converts the given string into an int value. When the string value is not a valid int, a 0 will be returned
         /// </summary>
         /// <param name="value">The string value</param>
+        /// <param name="fallback">The desired fallback</param>
         /// <returns>The converted int value</returns>
-        private static int ToInt(this string value)
+        private static int ToInt(this string value, int fallback = 0)
         {
-            return int.TryParse(value, out var result) ? result : 0;
+            return int.TryParse(value, out var result) ? result : fallback;
         }
 
         /// <summary>
@@ -59,6 +79,13 @@ namespace VersionChanger
             if (args.Any(a => a.ContainsIgnoreCase("-f=")))
             {
                 parameter.AssemblyInfoFile = args.FirstOrDefault(f => f.ContainsIgnoreCase("-f="))?.Replace("-f=", "");
+            }
+
+            if (args.Any(a => a.ContainsIgnoreCase("-vf=")))
+            {
+                var value = args.FirstOrDefault(f => f.ContainsIgnoreCase("-vf="))?.Replace("-vf=", "")
+                                .ToInt((int) VersionNumberFormat.Long) ?? (int) VersionNumberFormat.Long;
+                parameter.Format = (VersionNumberFormat) value;
             }
 
             parameter.Version = ExtractVersion(args);
@@ -145,13 +172,52 @@ namespace VersionChanger
         /// Creates a new version number
         /// </summary>
         /// <returns>The version number</returns>
-        public static Version CreateVersion()
+        public static Version CreateVersion(VersionNumberFormat format)
         {
             var year = DateTime.Now.ToString("yy").ToInt();
             var week = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay,
                 DayOfWeek.Monday);
 
-            return new Version(year, week, 0, (int) DateTime.Now.TimeOfDay.TotalMinutes);
+            switch (format)
+            {
+                case VersionNumberFormat.Short:
+                    return new Version(year, week);
+                case VersionNumberFormat.Middle:
+                    return new Version(year, week, 0);
+                default:
+                    return new Version(year, week, 0, (int)DateTime.Now.TimeOfDay.TotalMinutes);
+            }
+        }
+
+        /// <summary>
+        /// Prints the parameters
+        /// </summary>
+        /// <param name="parameters">The parameters</param>
+        public static void PrintParameters(Parameter parameters)
+        {
+            Console.WriteLine("Parameters:" +
+                              $"\r\n\t- Version: {parameters?.Version?.ToString() ?? "/"}" +
+                              $"\r\n\t- File...: {parameters?.AssemblyInfoFile ?? "/"}" +
+                              $"\r\n\t- Format.: {parameters?.Format ?? VersionNumberFormat.Long}");
+        }
+
+        /// <summary>
+        /// Gets the desired version string
+        /// </summary>
+        /// <param name="version">The version</param>
+        /// <param name="format">The version format</param>
+        /// <returns>The formatted version</returns>
+        public static string GetVersionString(Version version, VersionNumberFormat format)
+        {
+            switch (format)
+            {
+                case VersionNumberFormat.Short:
+                    return $"{version.Major}.{version.Minor}";
+                case VersionNumberFormat.Middle:
+                    return $"{version.Major}.{version.Minor}.{version.Build}";
+                default:
+                    return version.ToString();
+            }
         }
     }
 }

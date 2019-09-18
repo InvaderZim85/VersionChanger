@@ -13,18 +13,22 @@ namespace VersionChanger
         {
             var generatedVersion = false;
             var parameters = Global.ExtractParameter(args);
+
+            Global.PrintParameters(parameters);
+
             var givenVersion = parameters?.Version;
+            var versionFormat = parameters?.Format ?? Global.VersionNumberFormat.Long;
 
             if (givenVersion == null)
             {
                 Console.WriteLine("No version number was specified. Number is generated");
-                givenVersion = Global.CreateVersion();
+                givenVersion = Global.CreateVersion(versionFormat);
                 generatedVersion = true;
             }
 
             try
             {
-                var assemblyFile = "";
+                string assemblyFile;
                 if (string.IsNullOrEmpty(parameters?.AssemblyInfoFile))
                 {
                     // Get the path of the assembly file
@@ -52,22 +56,24 @@ namespace VersionChanger
                 if (generatedVersion)
                 {
                     var releaseNumber = currentVersion.Build < 0 ? 0 : currentVersion.Build;
+                    var revisionNumber = givenVersion.Revision < 0 ? 0 : givenVersion.Revision;
+
                     if (givenVersion.Major == currentVersion.Major && givenVersion.Minor == currentVersion.Minor)
                         releaseNumber++;
 
-                    version = new Version(givenVersion.Major, givenVersion.Minor, releaseNumber,
-                        givenVersion.Revision);
+                    version = new Version(givenVersion.Major, givenVersion.Minor, releaseNumber, revisionNumber);
                 }
                 else
                 {
                     version = givenVersion;
                 }
 
+                var versionString = Global.GetVersionString(version, versionFormat);
                 Console.WriteLine("Version numbers:" +
                                   $"\r\n\t- Current version: {currentVersion}" +
-                                  $"\r\n\t- New version....: {version}");
+                                  $"\r\n\t- New version....: {versionString}");
 
-                if (FileHelper.ChangeFileContent(assemblyFile, version.ToString()))
+                if (FileHelper.ChangeFileContent(assemblyFile, versionString))
                     Console.WriteLine("Version updated.");
                 else
                     Console.Error.WriteLine("An error has occured while updating the version number.");

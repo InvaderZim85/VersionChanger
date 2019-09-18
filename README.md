@@ -4,11 +4,12 @@ Small console application to change the version of a C# application
 **Content**
 <!-- TOC -->
 
-- [VersionChanger](#versionchanger)
-    - [What is the purpose?](#what-is-the-purpose)
-    - [Parameters](#parameters)
-    - [Installation](#installation)
-        - [Conditions](#conditions)
+- [What is the purpose?](#what-is-the-purpose)
+- [Parameters](#parameters)
+    - [Version format](#version-format)
+- [Installation](#installation)
+    - [Conditions](#conditions)
+- [.NET Core version](#net-core-version)
 
 <!-- /TOC -->
 
@@ -26,6 +27,7 @@ The tool can start with command line parameters. The following parameters are su
 | 4.  | r         | Revision number | `-r=12` |
 | 5.  | f         | Assembly file path | `-f="C:\Repos\Application\Properties\AssemblyInfo.cs` |
 | 6.  | /         | You can ship a complete version number without any switch. | `1.2.4.12` |
+| 7.  | vf        | Version format. For more information see: [Version format](#version-format). The default value is `3` when nothing is set| `-vf=3` |
 
 **Example**
 1. Assembly file and complete version
@@ -45,6 +47,15 @@ The tool can start with command line parameters. The following parameters are su
     ```
     VersionChanger.exe -ma=1 -mi=2 -b=4 -r=12
     ```
+
+### Version format
+The following formats are supported:
+
+| Id | Description | Example |
+|---:|-------------|---------|
+| 1  | Short format with only two places. | `1.2` |
+| 2  | Middle format with three places. | `1.2.3` |
+| 3  | Long format with four places (default value) | `1.2.3.4` |
 
 > **Note**: If you provide the version number without any switch like this `1.2.4.12` it will be parsed automatically by the [`Version.Parse`-Method](https://docs.microsoft.com/en-us/dotnet/api/system.version.parse?view=netframework-4.8). See the examples of the `Parse`-Method for more information.
 
@@ -120,3 +131,6 @@ Now you can add your configuration name to the pre-build event.
     1>  Clock -> D:\Repos\Clock\bin\PublishRelease\Clock.exe
     ========== Rebuild All: 1 succeeded, 0 failed, 0 skipped ==========
     ```
+
+## .NET Core version
+The .NET core version is still in development but has the same features as the .NET Framework application
