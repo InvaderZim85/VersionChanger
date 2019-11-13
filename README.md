@@ -116,9 +116,9 @@ The following formats are supported:
 
 | Id | Description | Example |
 |---:|-------------|---------|
-| 1  | Short format with only two places. | `1.2` |
+| 1  | Long format with four places (default) | `1.2.3.4` |
 | 2  | Middle format with three places. | `1.2.3` |
-| 3  | Long format with four places (default) | `1.2.3.4` |
+| 3  | Short format with only two places. | `1.2` |
 
 > **Note**: If you provide the version number with the switch `version` it will be parsed automatically by the `Version.Parse`-Method ([for more information click here](https://docs.microsoft.com/en-us/dotnet/api/system.version.parse?view=netframework-4.8)).
 
