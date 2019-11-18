@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using CommandLine;
 using Newtonsoft.Json;
 using VersionChanger.DataObjects;
 
@@ -19,6 +20,10 @@ namespace VersionChanger
         /// </summary>
         public enum VersionNumberFormat
         {
+            /// <summary>
+            /// The default value to indicate that no value was given
+            /// </summary>
+            None = 0,
             /// <summary>
             /// Long format with four places like 1.2.3.4 (default)
             /// </summary>
@@ -39,52 +44,17 @@ namespace VersionChanger
         public enum VersionType
         {
             /// <summary>
-            /// Creates a version with the following format: Year.DaysOfYear.ReleaseNumber.MinutesOfTheDay (e.G. 19.216.0.280)
+            /// The default value to indicate that no value was given
+            /// </summary>
+            None = 0,
+            /// <summary>
+            /// Creates a version with the following format: Year.DaysOfYear.ReleaseNumber.MinutesOfTheDay (e.G. 19.216.0.280) (default)
             /// </summary>
             WithDaysOfTheYear = 1,
             /// <summary>
             /// Creates a version with the following format: Year.CalendarWeek.ReleaseNumber.MinutesOfTheDay (e.G. 19.38.0.280)
             /// </summary>
             WithCalendarWeek = 2
-        }
-
-        /// <summary>
-        /// Contains the different argument keys
-        /// </summary>
-        private enum ArgumentKeys
-        {
-            /// <summary>
-            /// The major version number
-            /// </summary>
-            Major,
-            /// <summary>
-            /// The minor version number
-            /// </summary>
-            Minor,
-            /// <summary>
-            /// The build number
-            /// </summary>
-            Build,
-            /// <summary>
-            /// The revision number
-            /// </summary>
-            Revision,
-            /// <summary>
-            /// The path of the assembly file
-            /// </summary>
-            File,
-            /// <summary>
-            /// The desired version format
-            /// </summary>
-            Format,
-            /// <summary>
-            /// The desired version type
-            /// </summary>
-            Type,
-            /// <summary>
-            /// The complete version
-            /// </summary>
-            Version
         }
 
         /// <summary>
@@ -128,15 +98,47 @@ namespace VersionChanger
         /// <returns>The loaded parameters, if nothing is available null will be returned</returns>
         public static Parameter LoadParameter(string[] args)
         {
-            // Check if the user added some parameters
-            return args.Any() ? ExtractParameter(args) : LoadParameter();
+            // Load the config
+            var config = LoadConfig();
+
+            // Extract the command line arguments
+            return ExtractArguments(args, config);
+        }
+
+        /// <summary>
+        /// Extracts the command line arguments and compares them with the config
+        /// </summary>
+        /// <param name="args">The list with the arguments</param>
+        /// <param name="config">The config values</param>
+        /// <returns>The parameters</returns>
+        private static Parameter ExtractArguments(IEnumerable<string> args, Parameter config)
+        {
+            var result = new Parameter();
+
+            Parser.Default.ParseArguments<Arguments>(args).WithParsed(a =>
+            {
+                result.VersionType = a.VersionType != 0 // version not equal 0
+                    ? (VersionType) a.VersionType // Take the value from the arguments
+                    : config.VersionType != VersionType.None // Check the config value
+                        ? config.VersionType  // Take the value from the config
+                        : VersionType.WithDaysOfTheYear ; // Set the default value
+                result.Format = a.Format != 0 // Check
+                    ? (VersionNumberFormat) a.Format // Argument
+                    : config.Format != VersionNumberFormat.None // Check
+                        ? config.Format // Config value
+                        : VersionNumberFormat.Long; // Default value
+                result.Version = string.IsNullOrEmpty(a.Version) ? config.Version : ExtractVersion(a.Version);
+                result.AssemblyInfoFiles = a.AssemblyFiles.Any() ? a.AssemblyFiles.ToList() : config.AssemblyInfoFiles;
+            });
+
+            return result;
         }
 
         /// <summary>
         /// Loads the parameters of the config file if it's exists
         /// </summary>
         /// <returns>The parameters. If no parameters available, null will be returned</returns>
-        private static Parameter LoadParameter()
+        private static Parameter LoadConfig()
         {
             var path = Path.Combine(GetBaseFolder(), "VersionChangerConfig.json");
 
@@ -153,100 +155,6 @@ namespace VersionChanger
             {
                 Console.Error.WriteLine($"ERROR > An error has occured while loading the config file: {ex.Message}");
                 return null;
-            }
-        }
-
-        /// <summary>
-        /// Extracts the parameters from the given list
-        /// </summary>
-        /// <param name="args">The list with the arguments</param>
-        /// <returns>The parameters</returns>
-        private static Parameter ExtractParameter(string[] args)
-        {
-            var parameter = new Parameter();
-
-            var parameterList = new List<ArgumentValue>();
-            ArgumentValue value = null;
-
-            foreach (var entry in args)
-            {
-                if (entry.StartsWith("-"))
-                {
-                    if (value != null)
-                        parameterList.Add(value);
-
-                    value = new ArgumentValue(entry.Replace("-", ""));
-                }
-                else if (value != null)
-                {
-                    value.Value += $"{entry} ";
-                }
-            }
-
-            // Add the last argument value
-            if (value != null)
-                parameterList.Add(value);
-
-            // Nothing there, return null
-            if (!parameterList.Any())
-                return null;
-
-            // Get the version
-            Version version = null;
-            if (parameterList.Any(a =>
-                a.Key.Equals(ArgumentKeys.Version.ToString(), StringComparison.InvariantCultureIgnoreCase)))
-            {
-                version = ExtractVersion(GetEntry<string>(ArgumentKeys.Version, parameterList));
-            }
-            else
-            {
-                var major = GetEntry<int>(ArgumentKeys.Major, parameterList);
-                var minor = GetEntry<int>(ArgumentKeys.Minor, parameterList);
-                var build = GetEntry<int>(ArgumentKeys.Build, parameterList);
-                var revision = GetEntry<int>(ArgumentKeys.Revision, parameterList);
-
-                // Only when there is a "valid" number
-                if (major > 0 || minor > 0 || build > 0 || revision > 0)
-                    version = new Version(major, minor, build, revision);
-            }
-
-            parameter.Version = version;
-            parameter.AssemblyInfoFile = GetEntry<string>(ArgumentKeys.File, parameterList);
-
-            var format = GetEntry<int>(ArgumentKeys.Format, parameterList);
-            parameter.Format = (VersionNumberFormat) (format > 0 ? format : 1);
-
-            var type = GetEntry<int>(ArgumentKeys.Type, parameterList);
-            parameter.VersionType = (VersionType) (type > 0 ? type : 1);
-
-            return parameter;
-        }
-
-        /// <summary>
-        /// Gets the entry of the given key and tries to convert it into the desired type
-        /// </summary>
-        /// <typeparam name="T">The type of the value</typeparam>
-        /// <param name="key">The key</param>
-        /// <param name="arguments">The list with the arguments</param>
-        /// <returns>The converted type</returns>
-        private static T GetEntry<T>(ArgumentKeys key, List<ArgumentValue> arguments) where T : IConvertible
-        {
-            var entry = arguments.FirstOrDefault(f => f.Key.Equals(key.ToString(), StringComparison.InvariantCultureIgnoreCase));
-            if (entry == null)
-                return default;
-
-            if (string.IsNullOrEmpty(entry.Value))
-                return default;
-
-            try
-            {
-                return (T) Convert.ChangeType(entry.Value.Trim(), typeof(T));
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine(
-                    $"ERROR > An error has occured while extracting the command line parameters. Message: {ex.Message}");
-                return default;
             }
         }
 

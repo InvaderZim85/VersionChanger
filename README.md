@@ -4,16 +4,18 @@ Small console application to change the version of a C# application
 **Content**
 <!-- TOC -->
 
-- [VersionChanger](#versionchanger)
-    - [What is the purpose?](#what-is-the-purpose)
-    - [Configuration](#configuration)
-        - [Command line parameters](#command-line-parameters)
-        - [Configuration file](#configuration-file)
-        - [Version type](#version-type)
-        - [Version format](#version-format)
-    - [Usage / Installation (Pre-Build Event)](#usage--installation-pre-build-event)
-        - [Conditions](#conditions)
-    - [.NET Core version](#net-core-version)
+- [What is the purpose?](#what-is-the-purpose)
+- [Configuration](#configuration)
+    - [Command line parameters](#command-line-parameters)
+        - [v1.3.0.0 and newer](#v1300-and-newer)
+        - [v1.2.1.0 and older](#v1210-and-older)
+    - [Configuration file](#configuration-file)
+    - [Version type](#version-type)
+    - [Version format](#version-format)
+    - [Version creation](#version-creation)
+- [Usage / Installation (Pre-Build Event)](#usage--installation-pre-build-event)
+    - [Conditions](#conditions)
+- [.NET Core version](#net-core-version)
 
 <!-- /TOC -->
 
@@ -33,9 +35,22 @@ There are two ways how to set the settings:
 1. Command line parameters
 2. Configuration file
 
+> **Note**: You can *combine* the config. If a value is not specified in the command line arguments, it is taken from the config file. 
+
+> **Important**: The command line arguments overwrite the config values! For example, when you specified the format with the value *2* in the config file but add the command line argument for the format with the value *1*, the value from the command line (in this case *1*) will be taken.
+
 ### Command line parameters
 The tool can start with command line parameters. The following parameters are supported:
 
+#### v1.3.0.0 and newer
+| Nr. | Switch        | Description                                             | Example                                                                                                |
+|----:|---------------|---------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| 1.  | *-p --path*   | Path of the desired assembly files                      | `-p  "C:\Repos\Application\Properties\AssemblyInfo.cs" "C:\Repos\TestApp\Properties\AssemblyInfo.cs" ` |
+| 2.  | *-v*          | Version number                                          | `-v 1.2.4.12`                                                                                          |
+| 3.  | *-f --format* | Version format (see: [Version format](#version-format)) | `-f 2`                                                                                                 |
+| 4.  | *-t --type*   | Version type (see: [Version type](#version-type))       | `-t 1`                                                                                                 |
+
+#### v1.2.1.0 and older
 | Nr. | Switch    | Description     | Example |
 |----:|-----------|-----------------|---------|
 | 1.  | *-major*     | Major number    | `-major 1` |
@@ -53,20 +68,13 @@ The tool can start with command line parameters. The following parameters are su
 1. Assembly file and complete version
 
     ```
-    VersionChanger.exe -file "C:\Repos\Application\Properties\AssemblyInfo.cs" -version 1.2.4.12
+    VersionChanger.exe -p "C:\Repos\Application\Properties\AssemblyInfo.cs" -v 1.2.4.12
     ```
 
-2. Assembly file and major and minor number
+2. Multiple files with format and type
 
     ```
-    VersionChanger.exe -file "C:\Repos\Application\Properties\AssemblyInfo.cs" -major 1 -minor 2
-    ```
-
-3. Major, minor, build and revision number
-
-    ```
-    VersionChanger.exe -major 1 -minor 2 -build 4 -revision 12
-    ```
+    VersionChanger.exe -p "C:\Repos\App\AssemblyInfo.cs" "C:\Repos\TestApp\AssemblyInfo.cs" -f 2 -t 1
 
 ### Configuration file
 The settings can also be made in a configuration file. The file has the following format:
@@ -79,7 +87,9 @@ The settings can also be made in a configuration file. The file has the followin
         "Build": 3,
         "Revision": 4
     },
-    "AssemblyInfoFile": "D:\\Repositories\\MyApplication\\Properties\\AssemblyInfo.cs",
+    "AssemblyInfoFile": [
+        "D:\\Repositories\\MyApplication\\Properties\\AssemblyInfo.cs"
+    ],
     "Format": 2,
     "VersionType": 1
 }
@@ -88,14 +98,31 @@ The settings can also be made in a configuration file. The file has the followin
 > **Note**: The name of the configuration file must be **VersionChangerConfig.json** and must be in the same folder as the application.
 
 ### Version type
-If you don't set the version by yourself a new version number will be automatically generated. The format of the generated version is:
+The following types are supported:
+
+| Id | Description | Example |
+|---:|-------------|---------|
+| 1 | Days of the year (default) | 261 |
+| 2 | Calendar week | 38 |
+
+### Version format
+The following formats are supported:
+
+| Id | Description | Example |
+|---:|-------------|---------|
+| 1  | Long format with four places (default) | `1.2.3.4` |
+| 2  | Middle format with three places. | `1.2.3` |
+| 3  | Short format with only two places. | `1.2` |
+
+> **Note**: If you provide the version number with the switch `version` it will be parsed automatically by the `Version.Parse`-Method ([for more information click here](https://docs.microsoft.com/en-us/dotnet/api/system.version.parse?view=netframework-4.8)).
+
+### Version creation
+If you don't specifie the version by yourself a new version number will be automatically generated. The format of the generated version is:
 
 - Major: The last two numbers of the year (2019 > 19)
-- Minor. Here are two possibilities:
-    1. *Type 1*: Days of the year (e.G. 261) (this is the default type)
-    2. *Type 2*: Calendar week (e.G. 38)
+- Minor (see [Version type](#version-type))
 - Build
-- Revision: Minutes since midnight (e.G. 1146 > ~7pm)
+- Revision: Minutes since midnight (e.G. 1146 > ~7pm) (only set when format 1 is selected. See [Version format](#version-format))
 
 The *Build* number is calculated automatically. When the *major* and *minor* numbers are equal with the generated version the build number is increased by 1. When the numbers not equal the build number starts at 0.
 
@@ -110,17 +137,6 @@ The *major* and the *minor* numbers are equal. New version: `19.261.1.1147`
 - Generated version: `19.261.0.1147`
 
 The *major* and the *minor* numbers are not equal. New version: `19.261.0.1147`
-
-### Version format
-The following formats are supported:
-
-| Id | Description | Example |
-|---:|-------------|---------|
-| 1  | Long format with four places (default) | `1.2.3.4` |
-| 2  | Middle format with three places. | `1.2.3` |
-| 3  | Short format with only two places. | `1.2` |
-
-> **Note**: If you provide the version number with the switch `version` it will be parsed automatically by the `Version.Parse`-Method ([for more information click here](https://docs.microsoft.com/en-us/dotnet/api/system.version.parse?view=netframework-4.8)).
 
 ## Usage / Installation (Pre-Build Event)
 If you want to install the *VersionChanger* as a pre-build event you have to do the following:

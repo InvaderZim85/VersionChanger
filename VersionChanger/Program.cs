@@ -1,85 +1,89 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 namespace VersionChanger
 {
+    /// <summary>
+    /// Provides the main entry point of the program
+    /// </summary>
     internal static class Program
     {
+        /// <summary>
+        /// Contains the value which indicates if the version number was generated or shipped with the command line arguments
+        /// </summary>
+        private static bool _generatedVersion;
+
         /// <summary>
         /// The main entry point of the program
         /// </summary>
         /// <param name="args">The shipped arguments</param>
         private static void Main(string[] args)
         {
-            var generatedVersion = false;
             var parameters = Global.LoadParameter(args);
 
-            parameters?.Print();
+            if (parameters == null)
+            {
+                Console.Error.WriteLine("ERROR > Settings missing.");
+                return;
+            }
 
-            var givenVersion = parameters?.Version;
-            var versionFormat = parameters?.Format ?? Global.VersionNumberFormat.Long;
-            var versionType = parameters?.VersionType ?? Global.VersionType.WithDaysOfTheYear;
+            parameters.Print();
+
+            var givenVersion = parameters.Version;
+            var versionFormat = parameters.Format;
+            var versionType = parameters.VersionType;
 
             if (givenVersion == null)
             {
                 Console.WriteLine("INFO > No version number was specified. Number is generated");
                 givenVersion = Global.CreateVersion(versionFormat, versionType);
-                generatedVersion = true;
+                _generatedVersion = true;
             }
 
             try
             {
-                string assemblyFile;
-                if (string.IsNullOrEmpty(parameters?.AssemblyInfoFile))
+                if (parameters.AssemblyInfoFiles == null || !parameters.AssemblyInfoFiles.Where(File.Exists).ToList().Any())
                 {
-                    Console.WriteLine("INFO > No assembly file specified. Determine path of the local assembly file.");
-                    // Get the path of the assembly file
-                    assemblyFile = FileHelper.GetFile("AssemblyInfo", pattern: "*.cs");
-                    if (string.IsNullOrEmpty(assemblyFile))
-                    {
-                        Console.Error.WriteLine("ERROR > Path of the assembly info file could not be determined.");
-                        return;
-                    }
-                }
-                else
-                {
-                    assemblyFile = parameters.AssemblyInfoFile;
-                    if (!File.Exists(assemblyFile))
-                    {
-                        Console.Error.WriteLine("ERROR > Path of the assembly info file could not be determined.");
-                        return;
-                    }
+                    Console.Error.WriteLine("ERROR > Path of the assembly info file could not be determined.");
+                    return;
                 }
 
-                Console.WriteLine($"INFO > Assembly file: {assemblyFile}");
-
-                // Get the current version
-                var currentVersion = FileHelper.GetCurrentVersion(assemblyFile);
-
-                Version version;
-                if (generatedVersion)
+                foreach (var file in parameters.AssemblyInfoFiles)
                 {
-                    version = CompareVersions(currentVersion, givenVersion);
+                    UpdateVersion(file, givenVersion, versionFormat);
                 }
-                else
-                {
-                    version = givenVersion;
-                }
-
-                var versionString = Global.GetVersionString(version, versionFormat);
-                Console.WriteLine("INFO > Version numbers:" +
-                                  $"\r\n\t- Current version: {currentVersion}" +
-                                  $"\r\n\t- New version....: {versionString}");
-
-                if (FileHelper.ChangeFileContent(assemblyFile, versionString))
-                    Console.WriteLine("INFO > Version updated.");
-                else
-                    Console.Error.WriteLine("ERROR > An error has occured while updating the version number.");
             }
             catch (Exception ex)
             {
                 Console.Error.Write($"ERROR > An error has occured: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Changes the version of the version file
+        /// </summary>
+        /// <param name="filepath">The file path</param>
+        /// <param name="givenVersion"></param>
+        /// <param name="versionFormat"></param>
+        private static void UpdateVersion(string filepath, Version givenVersion, Global.VersionNumberFormat versionFormat)
+        {
+            Console.WriteLine($"INFO > Update version. File: {filepath}");
+
+            // Get the current version
+            var currentVersion = FileHelper.GetCurrentVersion(filepath);
+
+            var version = _generatedVersion ? CompareVersions(currentVersion, givenVersion) : givenVersion;
+
+            var versionString = Global.GetVersionString(version, versionFormat);
+            Console.WriteLine("INFO > Version numbers:" +
+                              $"\r\n\t- Current version: {currentVersion}" +
+                              $"\r\n\t- New version....: {versionString}");
+
+            if (FileHelper.ChangeFileContent(filepath, versionString))
+                Console.WriteLine("INFO > Version updated.");
+            else
+                Console.Error.WriteLine("ERROR > An error has occured while updating the version number.");
         }
 
         /// <summary>
