@@ -32,9 +32,13 @@ namespace VersionChanger.DataObjects
         /// </summary>
         public void Print()
         {
+            var files = AssemblyInfoFiles != null && AssemblyInfoFiles.Any()
+                ? string.Join(", ", AssemblyInfoFiles.Select(Path.GetFileName))
+                : "";
+
             Console.WriteLine("INFO > Parameters:" +
                               $"\r\n\t- Version.........: {Version}" +
-                              $"\r\n\t- Assembly file(s): {string.Join(", ", AssemblyInfoFiles.Select(Path.GetFileName))}" +
+                              $"\r\n\t- Assembly file(s): {files}" +
                               $"\r\n\t- Format..........: {Format}" +
                               $"\r\n\t- Version type....: {VersionType}");
         }
