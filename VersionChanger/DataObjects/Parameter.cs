@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace VersionChanger.DataObjects
 {
@@ -10,19 +13,19 @@ namespace VersionChanger.DataObjects
         public Version Version { get; set; }
 
         /// <summary>
-        /// Gets or sets the path of the assembly info file
+        /// Gets or sets the list with the assembly info files
         /// </summary>
-        public string AssemblyInfoFile { get; set; }
+        public List<string> AssemblyInfoFiles { get; set; }
 
         /// <summary>
-        /// Gets or sets the format (<see cref="Global.VersionNumberFormat.Long"/> is the default value)
+        /// Gets or sets the format (<see cref="Global.VersionNumberFormat.None"/> is the default value)
         /// </summary>
-        public Global.VersionNumberFormat Format { get; set; } = Global.VersionNumberFormat.Long;
+        public Global.VersionNumberFormat Format { get; set; } = Global.VersionNumberFormat.None;
 
         /// <summary>
-        /// Gets or sets the version type
+        /// Gets or sets the version type (<see cref="Global.VersionType.None"/> is the default value)
         /// </summary>
-        public Global.VersionType VersionType { get; set; } = Global.VersionType.WithDaysOfTheYear;
+        public Global.VersionType VersionType { get; set; } = Global.VersionType.None;
 
         /// <summary>
         /// Prints the parameters to the console
@@ -30,10 +33,10 @@ namespace VersionChanger.DataObjects
         public void Print()
         {
             Console.WriteLine("INFO > Parameters:" +
-                              $"\r\n\t- Version......: {Version}" +
-                              $"\r\n\t- Assembly file: {AssemblyInfoFile}" +
-                              $"\r\n\t- Format.......: {Format}" +
-                              $"\r\n\t- Version type.: {VersionType}");
+                              $"\r\n\t- Version.........: {Version}" +
+                              $"\r\n\t- Assembly file(s): {string.Join(", ", AssemblyInfoFiles.Select(Path.GetFileName))}" +
+                              $"\r\n\t- Format..........: {Format}" +
+                              $"\r\n\t- Version type....: {VersionType}");
         }
     }
 }
