@@ -120,8 +120,8 @@ namespace VersionChanger
                 result.VersionType = a.VersionType != 0 // version not equal 0
                     ? (VersionType) a.VersionType // Take the value from the arguments
                     : config.VersionType != VersionType.None // Check the config value
-                        ? config.VersionType  // Take the value from the config
-                        : VersionType.WithDaysOfTheYear ; // Set the default value
+                        ? config.VersionType // Take the value from the config
+                        : VersionType.WithDaysOfTheYear; // Set the default value
                 result.Format = a.Format != 0 // Check
                     ? (VersionNumberFormat) a.Format // Argument
                     : config.Format != VersionNumberFormat.None // Check
@@ -129,7 +129,7 @@ namespace VersionChanger
                         : VersionNumberFormat.Long; // Default value
                 result.Version = string.IsNullOrEmpty(a.Version) ? config.Version : ExtractVersion(a.Version);
                 result.AssemblyInfoFiles = a.AssemblyFiles.Any() ? a.AssemblyFiles.ToList() : config.AssemblyInfoFiles;
-            });
+            }).WithNotParsed(w => result = config);
 
             return result;
         }

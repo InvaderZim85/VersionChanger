@@ -43,13 +43,14 @@ namespace VersionChanger
 
             try
             {
-                if (parameters.AssemblyInfoFiles == null || !parameters.AssemblyInfoFiles.Where(File.Exists).ToList().Any())
+                var files = FileHelper.GetAssemblyFiles(parameters.AssemblyInfoFiles);
+                if (files == null)
                 {
                     Console.Error.WriteLine("ERROR > Path of the assembly info file could not be determined.");
                     return;
                 }
 
-                foreach (var file in parameters.AssemblyInfoFiles)
+                foreach (var file in files)
                 {
                     UpdateVersion(file, givenVersion, versionFormat);
                 }

@@ -17,13 +17,28 @@ namespace VersionChanger
         private static readonly Regex VersionNumberRegex = new Regex(@"\d+\.{1}\d+\.*\d*\.*\d*");
 
         /// <summary>
+        /// Checks if the given assembly files are valid. If the path / name is not valid, the method tries to determine the file
+        /// </summary>
+        /// <param name="assemblyFiles">The list with the assembly files</param>
+        /// <returns>The list with the valid files</returns>
+        public static IEnumerable<string> GetAssemblyFiles(IEnumerable<string> assemblyFiles)
+        {
+            var fileList = assemblyFiles.ToList();
+
+            var files = fileList.Where(w => !string.IsNullOrEmpty(w)).Select(Path.GetFullPath).ToList();
+
+            return files.Select(file => File.Exists(file) ? file : GetFile(Path.GetFileName(file)))
+                .Where(w => !string.IsNullOrEmpty(w)).ToList();
+        }
+
+        /// <summary>
         /// Gets the path of a specified file starting from the given directory
         /// </summary>
         /// <param name="filename">The name of the file</param>
         /// <param name="directory">The path of the start directory (optional, when empty the current directory will be chosen)</param>
         /// <param name="pattern">The search pattern (optional)</param>
         /// <returns>The full path of the file to be searched for</returns>
-        public static string GetFile(string filename, string directory = "", string pattern = "*.*")
+        private static string GetFile(string filename, string directory = "", string pattern = "*.*")
         {
             if (string.IsNullOrEmpty(directory))
                 directory = Global.GetBaseFolder();

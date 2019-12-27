@@ -5,9 +5,10 @@
         "Build": 3,
         "Revision": 4
     },
-    "AssemblyInfoFile": [
-        "E:\\Proggen\\Appz\\VersionChanger\\TestFiles\\SecondAssemblyInfo.cs",
-        "E:\\Proggen\\Appz\\VersionChanger\\TestFiles\\TestAssemblyInfo.cs"
+    "AssemblyInfoFiles": [
+        "D:\\Repositories\\Appz\\VersionChanger\\TestFiles\\SecondAssemblyInfo.cs",
+        "TestAssemblyInfo.cs",
+        "..\\..\\..\\TestFiles\\ThirdAssemblyInfo.cs"
     ],
     "Format": 2,
     "VersionType": 2
